@@ -1,0 +1,23 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>SwitchEnumAnalyzer</id>
+    <version>1.0.0.3</version>
+    <title>Switch Enum Analyzer</title>
+		<authors>astro75</authors>
+	  <description>Checks if switch statements on enums are exhaustive</description>
+<!--        
+		<owners>SwitchEnum</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
+    <copyright>Copyright</copyright>-->
+    <tags>analyzers</tags>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System" targetFramework="" />
+    </frameworkAssemblies>
+  </metadata>
+  <files>
+    <file src="*.dll" target="tools\analyzers\" exclude="**\Microsoft.CodeAnalysis.*;**\System.Collections.Immutable.*;**\System.Reflection.Metadata.*" />
+    <file src="tools\*.ps1" target="tools\" />
+  </files>
+</package>
