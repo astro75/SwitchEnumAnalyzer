@@ -33,39 +33,38 @@ namespace SwitchEnum
 			context.RegisterSyntaxNodeAction(Analyze, SyntaxKind.SwitchStatement);
 		}
 
-        private void Analyze(SyntaxNodeAnalysisContext context)
-        {
-            var switchSyntax = context.Node as SwitchStatementSyntax;
-            if (switchSyntax == null) return;
-            SwitchInformation information = GetInformationAboutSwitch(context.SemanticModel, switchSyntax, context.CancellationToken);
+		private void Analyze(SyntaxNodeAnalysisContext context)
+		{
+			if (context.Node is SwitchStatementSyntax switchSyntax)
+			{
+				SwitchInformation information = GetInformationAboutSwitch(context.SemanticModel, switchSyntax, context.CancellationToken);
 
-            if (information is SwitchInformation)
-            {
-                if (information.NotExhaustiveSwitch)
-                {
-                    var diagnostic = Diagnostic.Create(NotExhaustiveSwitchRule, switchSyntax.Expression.GetLocation(), string.Join("\n", information.NotFoundSymbolNames));
-                    context.ReportDiagnostic(diagnostic);
-                }
-                else if(information.UnreachableDefault)
-                {
-                    var diagnostic = Diagnostic.Create(DefaultUnreachableRule, switchSyntax.Expression.GetLocation());
-                    context.ReportDiagnostic(diagnostic);
-                }
-            }
-        }
+				if (information is SwitchInformation)
+				{
+					if (information.NotExhaustiveSwitch)
+					{
+						var diagnostic = Diagnostic.Create(NotExhaustiveSwitchRule, switchSyntax.Expression.GetLocation(), string.Join("\n", information.NotFoundSymbolNames));
+						context.ReportDiagnostic(diagnostic);
+					}
+					else if (information.UnreachableDefault)
+					{
+						var diagnostic = Diagnostic.Create(DefaultUnreachableRule, switchSyntax.Expression.GetLocation());
+						context.ReportDiagnostic(diagnostic);
+					}
+				}
+			}
+		}
 		
 
-        SwitchInformation GetInformationAboutSwitch(SemanticModel model, SwitchStatementSyntax node, CancellationToken ct)
+		SwitchInformation GetInformationAboutSwitch(SemanticModel model, SwitchStatementSyntax node, CancellationToken ct)
 		{
-            try
+			try
 			{
-                SwitchInformation info = new SwitchInformation();
+				SwitchInformation info = new SwitchInformation();
 
-                var type = model.GetTypeInfo(node.Expression, ct).Type;
-				if (type.TypeKind == TypeKind.Enum)
+				var type = model.GetTypeInfo(node.Expression, ct).Type;
+				if (isEnum(type))
 				{
-					// Exclude ctor
-					var members = type.GetMembers().Where(m => m.Kind == SymbolKind.Field);
 					var defaults = node.Sections.SelectMany(s => s.Labels).OfType<DefaultSwitchLabelSyntax>().ToArray();
 					info.HasDefault = defaults.Any();
 					if (info.HasDefault)
@@ -74,9 +73,10 @@ namespace SwitchEnum
 						var first = ((SwitchSectionSyntax)d.Parent).Statements.FirstOrDefault();
 						info.DefaultIsThrow = first is ThrowStatementSyntax;
 					}
-					var symbols = node.Sections.SelectMany(
-						s => s.Labels.OfType<CaseSwitchLabelSyntax>().Select(l => model.GetSymbolInfo(l.Value, ct).Symbol)).ToArray();
-					info.NotFoundSymbolNames = members.Where(m => !symbols.Any(s => Equals(s, m))).Select(m => m.Name).ToList();
+
+					info.NotFoundSymbolNames = GetUnusedSymbolNames(model, node, type, ct);
+
+					return info;
 				}
 			}
 			catch (Exception)
@@ -84,6 +84,28 @@ namespace SwitchEnum
 				// ignored
 			}
 			return null;
+		}
+
+		private static List<string> GetUnusedSymbolNames(SemanticModel model, SwitchStatementSyntax node, ITypeSymbol type, CancellationToken ct)
+		{
+			var enumSymbols = type.GetMembers()
+				.Where(m => m.Kind == SymbolKind.Field);
+
+			var symbolsUsed = node
+				.Sections
+				.SelectMany(s => s.Labels.OfType<CaseSwitchLabelSyntax>().Select(l => model.GetSymbolInfo(l.Value, ct).Symbol))
+				.ToArray();
+
+			var a = enumSymbols
+				.Where(m => !symbolsUsed.Any(s => Equals(s, m)))
+				.Select(m => m.Name)
+				.ToList();
+			return a;
+		}
+
+		private static bool isEnum(ITypeSymbol type)
+		{
+			return type.TypeKind == TypeKind.Enum;
 		}
 	}
 }

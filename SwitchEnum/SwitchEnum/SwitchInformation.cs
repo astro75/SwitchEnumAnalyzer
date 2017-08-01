@@ -11,7 +11,7 @@ namespace SwitchEnum
         public List<string> NotFoundSymbolNames { get; set; } = new List<string>();
         public bool HasDefault { get; set; }
         public bool DefaultIsThrow { get; set; }
-        public bool UnreachableDefault => HasDefault && NotFoundSymbolNames.Count == 0 && !DefaultIsThrow;
-        public bool NotExhaustiveSwitch => NotFoundSymbolNames.Any() && (HasDefault || DefaultIsThrow);
+        public bool UnreachableDefault => HasDefault && NotFoundSymbolNames.Any() == false && !DefaultIsThrow;
+        public bool NotExhaustiveSwitch => NotFoundSymbolNames.Any() && (!HasDefault || DefaultIsThrow);
     }
 }
