@@ -39,6 +39,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SwitchInformation.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
@@ -107,7 +108,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\v4.5\Microsoft.Portable.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>"$(SolutionDir)\packages\NuGet.CommandLine.2.8.2\tools\NuGet.exe" pack Diagnostic.nuspec -NoPackageAnalysis -OutputDirectory .</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
