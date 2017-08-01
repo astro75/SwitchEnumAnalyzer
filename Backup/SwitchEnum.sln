@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.22609.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwitchEnum", "SwitchEnum\SwitchEnum\SwitchEnum.csproj", "{BD2E511C-405C-4703-902B-05DDD30FB352}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F7C82FC2-CAC8-41AD-9ABF-5264DBAEE34E}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwitchEnum.Vsix", "SwitchEnum\SwitchEnum.Vsix\SwitchEnum.Vsix.csproj", "{97D7E698-60C7-4FFA-B1F0-388CB102A745}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BD2E511C-405C-4703-902B-05DDD30FB352}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD2E511C-405C-4703-902B-05DDD30FB352}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD2E511C-405C-4703-902B-05DDD30FB352}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD2E511C-405C-4703-902B-05DDD30FB352}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97D7E698-60C7-4FFA-B1F0-388CB102A745}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97D7E698-60C7-4FFA-B1F0-388CB102A745}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97D7E698-60C7-4FFA-B1F0-388CB102A745}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97D7E698-60C7-4FFA-B1F0-388CB102A745}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
