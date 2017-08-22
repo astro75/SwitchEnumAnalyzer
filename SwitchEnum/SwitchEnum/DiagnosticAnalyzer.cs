@@ -38,19 +38,17 @@ namespace SwitchEnum
             if (context.Node is SwitchStatementSyntax switchSyntax)
             {
                 SwitchInformation information = GetInformationAboutSwitch(context.SemanticModel, switchSyntax, context.CancellationToken);
+                if (information == null) return;
 
-                if (information is SwitchInformation)
+                if (information.NotExhaustiveSwitch)
                 {
-                    if (information.NotExhaustiveSwitch)
-                    {
-                        var diagnostic = Diagnostic.Create(NotExhaustiveSwitchRule, switchSyntax.Expression.GetLocation(), string.Join("\n", information.NotFoundSymbolNames));
-                        context.ReportDiagnostic(diagnostic);
-                    }
-                    else if (information.UnreachableDefault)
-                    {
-                        var diagnostic = Diagnostic.Create(DefaultUnreachableRule, switchSyntax.Expression.GetLocation());
-                        context.ReportDiagnostic(diagnostic);
-                    }
+                    var diagnostic = Diagnostic.Create(NotExhaustiveSwitchRule, switchSyntax.Expression.GetLocation(), string.Join("\n", information.NotFoundSymbolNames));
+                    context.ReportDiagnostic(diagnostic);
+                }
+                else if (information.UnreachableDefault)
+                {
+                    var diagnostic = Diagnostic.Create(DefaultUnreachableRule, switchSyntax.Expression.GetLocation());
+                    context.ReportDiagnostic(diagnostic);
                 }
             }
         }
