@@ -85,21 +85,17 @@ namespace SwitchEnum
 
         private static List<string> GetUnusedSymbolNames(SemanticModel model, SwitchStatementSyntax node, ITypeSymbol type, CancellationToken ct)
         {
-            var enumSymbols = type.GetMembers()
-                .Where(m => m.Kind == SymbolKind.Field);
-
             var symbolsUsed = node
                 .Sections
                 .SelectMany(s => s.Labels)
                 .OfType<CaseSwitchLabelSyntax>()
                 .Select(l => model.GetSymbolInfo(l.Value, ct).Symbol)
                 .ToImmutableHashSet();
-
-            var a = enumSymbols
-                .Where(m => !symbolsUsed.Contains(m))
+            return
+                type.GetMembers()
+                .Where(m => m.Kind == SymbolKind.Field && !symbolsUsed.Contains(m))
                 .Select(m => m.Name)
                 .ToList();
-            return a;
         }
 
         private static bool isEnum(ITypeSymbol type)
