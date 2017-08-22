@@ -66,30 +66,22 @@ namespace SwitchEnum
 
         SwitchInformation GetInformationAboutSwitch(SemanticModel model, SwitchStatementSyntax node, CancellationToken ct)
         {
-            try
-            {
-                var type = model.GetTypeInfo(node.Expression, ct).Type;
-                if (type.TypeKind == TypeKind.Enum)
-                {
-                    var @defaultSection =
-                        node.Sections.FirstOrDefault(s =>
-                            s.Labels.Any(l => l is DefaultSwitchLabelSyntax)
-                        );
-                    return
-                        new SwitchInformation(
-                            GetUnusedSymbolNames(model, node, type, ct),
-                            hasDefault: @defaultSection != null,
-                            defaultIsThrow:
-                                @defaultSection.Statements
-                                .Any(s => s is ThrowStatementSyntax)
-                        );
-                }
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-            return null;
+            var type = model.GetTypeInfo(node.Expression, ct).Type;
+            if (type == null || type.TypeKind != TypeKind.Enum) return null;
+
+            var @defaultSection =
+                node.Sections.FirstOrDefault(s =>
+                    s.Labels.Any(l => l is DefaultSwitchLabelSyntax)
+                );
+            return
+                new SwitchInformation(
+                    GetUnusedSymbolNames(model, node, type, ct),
+                    hasDefault:
+                        @defaultSection != null,
+                    defaultIsThrow:
+                        defaultSection != null
+                        && @defaultSection.Statements.Any(s => s is ThrowStatementSyntax)
+                );
         }
 
         private static ImmutableArray<string> GetUnusedSymbolNames(SemanticModel model, SwitchStatementSyntax node, ITypeSymbol type, CancellationToken ct)
