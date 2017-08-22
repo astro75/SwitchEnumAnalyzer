@@ -49,7 +49,7 @@ namespace SwitchEnum
         {
             if (!(context.Node is SwitchStatementSyntax switchSyntax)) return;
 
-            SwitchInformation information = GetInformationAboutSwitch(context.SemanticModel, switchSyntax, context.CancellationToken);
+            var information = GetInformationAboutSwitch(context.SemanticModel, switchSyntax, context.CancellationToken);
             if (information == null) return;
 
             if (information.NotExhaustiveSwitch)
@@ -69,7 +69,7 @@ namespace SwitchEnum
         {
             try
             {
-                SwitchInformation info = new SwitchInformation();
+                var info = new SwitchInformation();
 
                 var type = model.GetTypeInfo(node.Expression, ct).Type;
                 if (type.TypeKind == TypeKind.Enum)
