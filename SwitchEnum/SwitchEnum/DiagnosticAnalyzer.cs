@@ -93,10 +93,10 @@ namespace SwitchEnum
                 .SelectMany(s => s.Labels)
                 .OfType<CaseSwitchLabelSyntax>()
                 .Select(l => model.GetSymbolInfo(l.Value, ct).Symbol)
-                .ToArray();
+                .ToImmutableHashSet();
 
             var a = enumSymbols
-                .Where(m => !symbolsUsed.Any(s => Equals(s, m)))
+                .Where(m => !symbolsUsed.Contains(m))
                 .Select(m => m.Name)
                 .ToList();
             return a;
