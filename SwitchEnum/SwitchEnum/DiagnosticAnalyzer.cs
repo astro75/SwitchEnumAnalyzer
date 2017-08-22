@@ -74,14 +74,16 @@ namespace SwitchEnum
                 var type = model.GetTypeInfo(node.Expression, ct).Type;
                 if (type.TypeKind == TypeKind.Enum)
                 {
-                    var defaults = node.Sections.SelectMany(s => s.Labels).OfType<DefaultSwitchLabelSyntax>().ToArray();
-                    info.HasDefault = defaults.Any();
-                    if (info.HasDefault)
-                    {
-                        var d = defaults.First();
-                        var first = ((SwitchSectionSyntax)d.Parent).Statements.FirstOrDefault();
-                        info.DefaultIsThrow = first is ThrowStatementSyntax;
-                    }
+                    var @defaultSection =
+                        node.Sections.FirstOrDefault(s =>
+                            s.Labels.Any(l => l is DefaultSwitchLabelSyntax)
+                        );
+
+                    info.HasDefault = @defaultSection != null;
+
+                    info.DefaultIsThrow =
+                        @defaultSection.Statements
+                        .Any(s => s is ThrowStatementSyntax);
 
                     info.NotFoundSymbolNames = GetUnusedSymbolNames(model, node, type, ct);
 
