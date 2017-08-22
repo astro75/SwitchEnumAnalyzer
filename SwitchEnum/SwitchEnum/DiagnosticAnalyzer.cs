@@ -60,7 +60,7 @@ namespace SwitchEnum
                 SwitchInformation info = new SwitchInformation();
 
                 var type = model.GetTypeInfo(node.Expression, ct).Type;
-                if (isEnum(type))
+                if (type.TypeKind == TypeKind.Enum)
                 {
                     var defaults = node.Sections.SelectMany(s => s.Labels).OfType<DefaultSwitchLabelSyntax>().ToArray();
                     info.HasDefault = defaults.Any();
@@ -96,11 +96,6 @@ namespace SwitchEnum
                 .Where(m => m.Kind == SymbolKind.Field && !symbolsUsed.Contains(m))
                 .Select(m => m.Name)
                 .ToList();
-        }
-
-        private static bool isEnum(ITypeSymbol type)
-        {
-            return type.TypeKind == TypeKind.Enum;
         }
     }
 }
