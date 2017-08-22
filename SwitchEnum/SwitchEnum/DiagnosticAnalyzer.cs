@@ -15,16 +15,28 @@ namespace SwitchEnum
     public class SwitchEnumAnalyzer : DiagnosticAnalyzer
     {
         public const string DiagnosticId = "SwitchEnumAnalyzer";
-        internal const string Title = "Switch on enum is not exhaustive";
-        internal const string Title2 = "Switch default unreachable";
-        internal const string MessageFormat = "Missing cases:\n{0}";
-        internal const string Category = "Logic";
 
-        public static DiagnosticSeverity DefaultUnreachableSeverity = DiagnosticSeverity.Warning;
-        public static DiagnosticSeverity NotExhaustiveSwitchSeverity = DiagnosticSeverity.Error;
+        const string DefaultUnreachableRuleTitle = "Switch default unreachable";
 
-        internal static DiagnosticDescriptor NotExhaustiveSwitchRule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, NotExhaustiveSwitchSeverity, isEnabledByDefault: true);
-        internal static DiagnosticDescriptor DefaultUnreachableRule = new DiagnosticDescriptor(DiagnosticId, Title2, Title2, Category, DefaultUnreachableSeverity, isEnabledByDefault: true);
+        static readonly DiagnosticDescriptor NotExhaustiveSwitchRule =
+            new DiagnosticDescriptor(
+                DiagnosticId,
+                "Switch on enum is not exhaustive",
+                "Missing cases:\n{0}",
+                "Logic",
+                DiagnosticSeverity.Error,
+                isEnabledByDefault: true
+            );
+
+        static readonly DiagnosticDescriptor DefaultUnreachableRule =
+            new DiagnosticDescriptor(
+                DiagnosticId,
+                DefaultUnreachableRuleTitle,
+                DefaultUnreachableRuleTitle,
+                "Logic",
+                DiagnosticSeverity.Warning,
+                isEnabledByDefault: true
+            );
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(NotExhaustiveSwitchRule, DefaultUnreachableRule);
 
