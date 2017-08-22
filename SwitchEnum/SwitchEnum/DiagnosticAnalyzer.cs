@@ -78,7 +78,7 @@ namespace SwitchEnum
                     GetUnusedSymbolNames(model, node, type, ct),
                     hasDefault:
                         @defaultSection != null,
-                    defaultIsThrow:
+                    defaultThrows:
                         defaultSection != null
                         && @defaultSection.Statements.Any(s => s is ThrowStatementSyntax)
                 );

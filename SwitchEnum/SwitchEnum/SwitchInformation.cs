@@ -11,16 +11,16 @@ namespace SwitchEnum
     {
         public ImmutableArray<string> NotFoundSymbolNames { get; }
         public bool HasDefault { get; }
-        public bool DefaultIsThrow { get; }
+        public bool DefaultThrows { get; }
 
-        public bool UnreachableDefault => HasDefault && NotFoundSymbolNames.Any() == false && !DefaultIsThrow;
-        public bool NotExhaustiveSwitch => NotFoundSymbolNames.Any() && (!HasDefault || DefaultIsThrow);
+        public bool UnreachableDefault => HasDefault && NotFoundSymbolNames.Any() == false && !DefaultThrows;
+        public bool NotExhaustiveSwitch => NotFoundSymbolNames.Any() && (!HasDefault || DefaultThrows);
 
-        public SwitchInformation(ImmutableArray<string> notFoundSymbolNames, bool hasDefault, bool defaultIsThrow)
+        public SwitchInformation(ImmutableArray<string> notFoundSymbolNames, bool hasDefault, bool defaultThrows)
         {
             NotFoundSymbolNames = notFoundSymbolNames;
             HasDefault = hasDefault;
-            DefaultIsThrow = defaultIsThrow;
+            DefaultThrows = defaultThrows;
         }
     }
 }
