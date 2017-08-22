@@ -35,21 +35,20 @@ namespace SwitchEnum
 
         private void Analyze(SyntaxNodeAnalysisContext context)
         {
-            if (context.Node is SwitchStatementSyntax switchSyntax)
-            {
-                SwitchInformation information = GetInformationAboutSwitch(context.SemanticModel, switchSyntax, context.CancellationToken);
-                if (information == null) return;
+            if (!(context.Node is SwitchStatementSyntax switchSyntax)) return;
 
-                if (information.NotExhaustiveSwitch)
-                {
-                    var diagnostic = Diagnostic.Create(NotExhaustiveSwitchRule, switchSyntax.Expression.GetLocation(), string.Join("\n", information.NotFoundSymbolNames));
-                    context.ReportDiagnostic(diagnostic);
-                }
-                else if (information.UnreachableDefault)
-                {
-                    var diagnostic = Diagnostic.Create(DefaultUnreachableRule, switchSyntax.Expression.GetLocation());
-                    context.ReportDiagnostic(diagnostic);
-                }
+            SwitchInformation information = GetInformationAboutSwitch(context.SemanticModel, switchSyntax, context.CancellationToken);
+            if (information == null) return;
+
+            if (information.NotExhaustiveSwitch)
+            {
+                var diagnostic = Diagnostic.Create(NotExhaustiveSwitchRule, switchSyntax.Expression.GetLocation(), string.Join("\n", information.NotFoundSymbolNames));
+                context.ReportDiagnostic(diagnostic);
+            }
+            else if (information.UnreachableDefault)
+            {
+                var diagnostic = Diagnostic.Create(DefaultUnreachableRule, switchSyntax.Expression.GetLocation());
+                context.ReportDiagnostic(diagnostic);
             }
         }
         
