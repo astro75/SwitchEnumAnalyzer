@@ -45,7 +45,7 @@ namespace SwitchEnum
             context.RegisterSyntaxNodeAction(Analyze, SyntaxKind.SwitchStatement);
         }
 
-        private void Analyze(SyntaxNodeAnalysisContext context)
+        private static void Analyze(SyntaxNodeAnalysisContext context)
         {
             if (!(context.Node is SwitchStatementSyntax switchSyntax)) return;
 
@@ -64,7 +64,7 @@ namespace SwitchEnum
             }
         }
 
-        SwitchInformation GetSwitchInformation(SemanticModel model, SwitchStatementSyntax node, CancellationToken ct)
+        static SwitchInformation GetSwitchInformation(SemanticModel model, SwitchStatementSyntax node, CancellationToken ct)
         {
             var type = model.GetTypeInfo(node.Expression, ct).Type;
             if (type == null || type.TypeKind != TypeKind.Enum) return null;
