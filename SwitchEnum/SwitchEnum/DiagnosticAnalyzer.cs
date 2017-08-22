@@ -90,7 +90,9 @@ namespace SwitchEnum
 
             var symbolsUsed = node
                 .Sections
-                .SelectMany(s => s.Labels.OfType<CaseSwitchLabelSyntax>().Select(l => model.GetSymbolInfo(l.Value, ct).Symbol))
+                .SelectMany(s => s.Labels)
+                .OfType<CaseSwitchLabelSyntax>()
+                .Select(l => model.GetSymbolInfo(l.Value, ct).Symbol)
                 .ToArray();
 
             var a = enumSymbols
