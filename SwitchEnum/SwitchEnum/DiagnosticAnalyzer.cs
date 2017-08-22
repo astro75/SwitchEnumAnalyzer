@@ -63,14 +63,11 @@ namespace SwitchEnum
                 context.ReportDiagnostic(diagnostic);
             }
         }
-        
 
         SwitchInformation GetInformationAboutSwitch(SemanticModel model, SwitchStatementSyntax node, CancellationToken ct)
         {
             try
             {
-                var info = new SwitchInformation();
-
                 var type = model.GetTypeInfo(node.Expression, ct).Type;
                 if (type.TypeKind == TypeKind.Enum)
                 {
@@ -78,16 +75,14 @@ namespace SwitchEnum
                         node.Sections.FirstOrDefault(s =>
                             s.Labels.Any(l => l is DefaultSwitchLabelSyntax)
                         );
-
-                    info.HasDefault = @defaultSection != null;
-
-                    info.DefaultIsThrow =
-                        @defaultSection.Statements
-                        .Any(s => s is ThrowStatementSyntax);
-
-                    info.NotFoundSymbolNames = GetUnusedSymbolNames(model, node, type, ct);
-
-                    return info;
+                    return
+                        new SwitchInformation(
+                            GetUnusedSymbolNames(model, node, type, ct),
+                            hasDefault: @defaultSection != null,
+                            defaultIsThrow:
+                                @defaultSection.Statements
+                                .Any(s => s is ThrowStatementSyntax)
+                        );
                 }
             }
             catch (Exception)
@@ -97,7 +92,7 @@ namespace SwitchEnum
             return null;
         }
 
-        private static List<string> GetUnusedSymbolNames(SemanticModel model, SwitchStatementSyntax node, ITypeSymbol type, CancellationToken ct)
+        private static ImmutableArray<string> GetUnusedSymbolNames(SemanticModel model, SwitchStatementSyntax node, ITypeSymbol type, CancellationToken ct)
         {
             var symbolsUsed = node
                 .Sections
@@ -109,7 +104,7 @@ namespace SwitchEnum
                 type.GetMembers()
                 .Where(m => m.Kind == SymbolKind.Field && !symbolsUsed.Contains(m))
                 .Select(m => m.Name)
-                .ToList();
+                .ToImmutableArray();
         }
     }
 }
