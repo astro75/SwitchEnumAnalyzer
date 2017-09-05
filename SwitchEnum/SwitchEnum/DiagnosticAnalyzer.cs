@@ -11,72 +11,92 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace SwitchEnum
 {
-	[DiagnosticAnalyzer(LanguageNames.CSharp)]
-	public class SwitchEnumAnalyzer : DiagnosticAnalyzer
-	{
-		public const string DiagnosticId = "SwitchEnumAnalyzer";
-		internal const string Title = "Switch on enum is not exhaustive";
-		internal const string Title2 = "Switch default unreachable";
-		internal const string MessageFormat = "Missing cases:\n{0}";
-		internal const string Category = "Logic";
+    [DiagnosticAnalyzer(LanguageNames.CSharp)]
+    public class SwitchEnumAnalyzer : DiagnosticAnalyzer
+    {
+        public const string DiagnosticId = "SwitchEnumAnalyzer";
 
-		internal static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Error, isEnabledByDefault: true);
-		internal static DiagnosticDescriptor Rule2 = new DiagnosticDescriptor(DiagnosticId, Title2, Title2, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true);
+        const string DefaultUnreachableRuleTitle = "Switch default unreachable";
 
-		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule, Rule2);
+        static readonly DiagnosticDescriptor NotExhaustiveSwitchRule =
+            new DiagnosticDescriptor(
+                DiagnosticId,
+                "Switch on enum is not exhaustive",
+                "Missing cases:\n{0}",
+                "Logic",
+                DiagnosticSeverity.Error,
+                isEnabledByDefault: true
+            );
 
-		public override void Initialize(AnalysisContext context)
-		{
-			context.RegisterSyntaxNodeAction(Analyze, SyntaxKind.SwitchStatement);
-		}
+        static readonly DiagnosticDescriptor DefaultUnreachableRule =
+            new DiagnosticDescriptor(
+                DiagnosticId,
+                DefaultUnreachableRuleTitle,
+                DefaultUnreachableRuleTitle,
+                "Logic",
+                DiagnosticSeverity.Warning,
+                isEnabledByDefault: true
+            );
 
-		private void Analyze(SyntaxNodeAnalysisContext context)
-		{
-			var switchSyntax = context.Node as SwitchStatementSyntax;
-      if (switchSyntax == null) return;
-			var result = VisitSwitchStatement(context.SemanticModel, switchSyntax, context.CancellationToken);
-		  if (result == null) return;
-		  var hasDefault = result.Item2;
-		  var defaultIsThrow = result.Item3;
-      if (result.Item1.Count > 0) {
-		    if (!hasDefault || defaultIsThrow) {
-		      var diagnostic = Diagnostic.Create(Rule, switchSyntax.Expression.GetLocation(), string.Join("\n", result.Item1));
-          context.ReportDiagnostic(diagnostic);
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(NotExhaustiveSwitchRule, DefaultUnreachableRule);
+
+        public override void Initialize(AnalysisContext context)
+        {
+            context.RegisterSyntaxNodeAction(Analyze, SyntaxKind.SwitchStatement);
         }
-      }
-		  else {
-        if (hasDefault && !defaultIsThrow) {
-          var diagnostic = Diagnostic.Create(Rule2, switchSyntax.Expression.GetLocation());
-          context.ReportDiagnostic(diagnostic);
-        }
-      }
-		}
 
-		Tuple<List<string>,bool,bool> VisitSwitchStatement(SemanticModel model, SwitchStatementSyntax node, CancellationToken ct)
-		{
-			try {
-				var type = model.GetTypeInfo(node.Expression, ct).Type;
-				if (type.TypeKind == TypeKind.Enum) {
-					                                        // Exclude ctor
-					var members = type.GetMembers().Where(m => m.Kind == SymbolKind.Field);
-					var defaults = node.Sections.SelectMany(s => s.Labels).OfType<DefaultSwitchLabelSyntax>().ToArray();
-				  var hasDefault = defaults.Any();
-				  var defaultIsThrow = false;
-					if (hasDefault) {
-					  var d = defaults.First();
-					  var first = ((SwitchSectionSyntax) d.Parent).Statements.FirstOrDefault();
-					  defaultIsThrow = first is ThrowStatementSyntax;
-					}
-          var symbols = node.Sections.SelectMany(
-              s => s.Labels.OfType<CaseSwitchLabelSyntax>().Select(l => model.GetSymbolInfo(l.Value, ct).Symbol)).ToArray();
-          var notFound = members.Where(m => !symbols.Any(s => Equals(s, m))).Select(m => m.Name).ToList();
-          return Tuple.Create(notFound, hasDefault, defaultIsThrow);
+        private static void Analyze(SyntaxNodeAnalysisContext context)
+        {
+            if (!(context.Node is SwitchStatementSyntax switchSyntax)) return;
+
+            var information = GetSwitchInformation(context.SemanticModel, switchSyntax, context.CancellationToken);
+            if (information == null) return;
+
+            if (information.NotExhaustiveSwitch)
+            {
+                var diagnostic = Diagnostic.Create(NotExhaustiveSwitchRule, switchSyntax.Expression.GetLocation(), string.Join("\n", information.NotFoundSymbolNames));
+                context.ReportDiagnostic(diagnostic);
+            }
+            else if (information.UnreachableDefault)
+            {
+                var diagnostic = Diagnostic.Create(DefaultUnreachableRule, switchSyntax.Expression.GetLocation());
+                context.ReportDiagnostic(diagnostic);
+            }
         }
-			}
-			catch (Exception) {
-				// ignored
-			}
-			return null;
-		}
-	}
+
+        static SwitchInformation GetSwitchInformation(SemanticModel model, SwitchStatementSyntax node, CancellationToken ct)
+        {
+            var type = model.GetTypeInfo(node.Expression, ct).Type;
+            if (type == null || type.TypeKind != TypeKind.Enum) return null;
+
+            var @defaultSection =
+                node.Sections.FirstOrDefault(s =>
+                    s.Labels.Any(l => l is DefaultSwitchLabelSyntax)
+                );
+            return
+                new SwitchInformation(
+                    GetUnusedSymbolNames(model, node, type, ct),
+                    hasDefault:
+                        @defaultSection != null,
+                    defaultThrows:
+                        defaultSection != null
+                        && @defaultSection.Statements.Any(s => s is ThrowStatementSyntax)
+                );
+        }
+
+        private static ImmutableArray<string> GetUnusedSymbolNames(SemanticModel model, SwitchStatementSyntax node, ITypeSymbol type, CancellationToken ct)
+        {
+            var symbolsUsed = node
+                .Sections
+                .SelectMany(s => s.Labels)
+                .OfType<CaseSwitchLabelSyntax>()
+                .Select(l => model.GetSymbolInfo(l.Value, ct).Symbol)
+                .ToImmutableHashSet();
+            return
+                type.GetMembers()
+                .Where(m => m.Kind == SymbolKind.Field && !symbolsUsed.Contains(m))
+                .Select(m => m.Name)
+                .ToImmutableArray();
+        }
+    }
 }
