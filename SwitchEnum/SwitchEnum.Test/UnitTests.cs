@@ -41,13 +41,13 @@ namespace SwitchEnum.Test
     }";
 			var expected = new DiagnosticResult
 			{
-				Id=SwitchEnumAnalyzer.DiagnosticId,
-				Message=String.Format("Type name '{0}' contains lowercase letters", "TypeName"),
-				Severity=DiagnosticSeverity.Warning,
-				Locations=
-							new[] {
-														new DiagnosticResultLocation("Test0.cs", 11, 15)
-												}
+				Id = "SwitchEnum",
+				Message = String.Format("Type name '{0}' contains lowercase letters", "TypeName"),
+				Severity = DiagnosticSeverity.Warning,
+				Locations =
+					new[] {
+							new DiagnosticResultLocation("Test0.cs", 11, 15)
+						}
 			};
 
 			VerifyCSharpDiagnostic(test, expected);

@@ -47,7 +47,7 @@ namespace SwitchEnum
 				if (object.ReferenceEquals(resourceMan, null))
 				{
 					global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SwitchEnum.Resources", typeof(Resources).GetTypeInfo().Assembly);
-					resourceMan=temp;
+					resourceMan = temp;
 				}
 				return resourceMan;
 			}
@@ -66,7 +66,7 @@ namespace SwitchEnum
 			}
 			set
 			{
-				resourceCulture=value;
+				resourceCulture = value;
 			}
 		}
 

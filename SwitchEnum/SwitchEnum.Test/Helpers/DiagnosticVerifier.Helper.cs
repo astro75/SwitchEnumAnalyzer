@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 
 namespace TestHelper
 {
@@ -16,16 +15,14 @@ namespace TestHelper
 	/// </summary>
 	public abstract partial class DiagnosticVerifier
 	{
-		private static readonly MetadataReference CorlibReference = MetadataReference.CreateFromAssembly(typeof(object).Assembly);
-		private static readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromAssembly(typeof(Enumerable).Assembly);
-		private static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromAssembly(typeof(CSharpCompilation).Assembly);
-		private static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromAssembly(typeof(Compilation).Assembly);
+		private static readonly MetadataReference CorlibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+		private static readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
+		private static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
+		private static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
 
 		internal static string DefaultFilePathPrefix = "Test";
 		internal static string CSharpDefaultFileExt = "cs";
 		internal static string VisualBasicDefaultExt = "vb";
-		internal static string CSharpDefaultFilePath = DefaultFilePathPrefix+0+"."+CSharpDefaultFileExt;
-		internal static string VisualBasicDefaultFilePath = DefaultFilePathPrefix+0+"."+VisualBasicDefaultExt;
 		internal static string TestProjectName = "TestProject";
 
 		#region  Get Diagnostics
@@ -48,7 +45,6 @@ namespace TestHelper
 		/// </summary>
 		/// <param name="analyzer">The analyzer to run on the documents</param>
 		/// <param name="documents">The Documents that the analyzer will be run on</param>
-		/// <param name="spans">Optional TextSpan indicating where a Diagnostic will be found</param>
 		/// <returns>An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location</returns>
 		protected static Diagnostic[] GetSortedDiagnosticsFromDocuments(DiagnosticAnalyzer analyzer, Document[] documents)
 		{
@@ -65,17 +61,17 @@ namespace TestHelper
 				var diags = compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().Result;
 				foreach (var diag in diags)
 				{
-					if (diag.Location==Location.None||diag.Location.IsInMetadata)
+					if (diag.Location == Location.None || diag.Location.IsInMetadata)
 					{
 						diagnostics.Add(diag);
 					}
 					else
 					{
-						for (int i = 0; i<documents.Length; i++)
+						for (int i = 0; i < documents.Length; i++)
 						{
 							var document = documents[i];
 							var tree = document.GetSyntaxTreeAsync().Result;
-							if (tree==diag.Location.SourceTree)
+							if (tree == diag.Location.SourceTree)
 							{
 								diagnostics.Add(diag);
 							}
@@ -110,20 +106,15 @@ namespace TestHelper
 		/// <returns>A Tuple containing the Documents produced from the sources and their TextSpans if relevant</returns>
 		private static Document[] GetDocuments(string[] sources, string language)
 		{
-			if (language!=LanguageNames.CSharp&&language!=LanguageNames.VisualBasic)
+			if (language != LanguageNames.CSharp && language != LanguageNames.VisualBasic)
 			{
 				throw new ArgumentException("Unsupported Language");
-			}
-
-			for (int i = 0; i<sources.Length; i++)
-			{
-				string fileName = language==LanguageNames.CSharp ? "Test"+i+".cs" : "Test"+i+".vb";
 			}
 
 			var project = CreateProject(sources, language);
 			var documents = project.Documents.ToArray();
 
-			if (sources.Length!=documents.Length)
+			if (sources.Length != documents.Length)
 			{
 				throw new SystemException("Amount of sources did not match amount of Documents created");
 			}
@@ -151,24 +142,24 @@ namespace TestHelper
 		private static Project CreateProject(string[] sources, string language = LanguageNames.CSharp)
 		{
 			string fileNamePrefix = DefaultFilePathPrefix;
-			string fileExt = language==LanguageNames.CSharp ? CSharpDefaultFileExt : VisualBasicDefaultExt;
+			string fileExt = language == LanguageNames.CSharp ? CSharpDefaultFileExt : VisualBasicDefaultExt;
 
 			var projectId = ProjectId.CreateNewId(debugName: TestProjectName);
 
 			var solution = new AdhocWorkspace()
-					.CurrentSolution
-					.AddProject(projectId, TestProjectName, TestProjectName, language)
-					.AddMetadataReference(projectId, CorlibReference)
-					.AddMetadataReference(projectId, SystemCoreReference)
-					.AddMetadataReference(projectId, CSharpSymbolsReference)
-					.AddMetadataReference(projectId, CodeAnalysisReference);
+				.CurrentSolution
+				.AddProject(projectId, TestProjectName, TestProjectName, language)
+				.AddMetadataReference(projectId, CorlibReference)
+				.AddMetadataReference(projectId, SystemCoreReference)
+				.AddMetadataReference(projectId, CSharpSymbolsReference)
+				.AddMetadataReference(projectId, CodeAnalysisReference);
 
 			int count = 0;
 			foreach (var source in sources)
 			{
-				var newFileName = fileNamePrefix+count+"."+fileExt;
+				var newFileName = fileNamePrefix + count + "." + fileExt;
 				var documentId = DocumentId.CreateNewId(projectId, debugName: newFileName);
-				solution=solution.AddDocument(documentId, newFileName, SourceText.From(source));
+				solution = solution.AddDocument(documentId, newFileName, SourceText.From(source));
 				count++;
 			}
 			return solution.GetProject(projectId);

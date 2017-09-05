@@ -44,9 +44,9 @@ namespace TestHelper
 			int oldIndex = 0;
 			int newIndex = 0;
 
-			while (newIndex<newArray.Length)
+			while (newIndex < newArray.Length)
 			{
-				if (oldIndex<oldArray.Length&&oldArray[oldIndex].Id==newArray[newIndex].Id)
+				if (oldIndex < oldArray.Length && oldArray[oldIndex].Id == newArray[newIndex].Id)
 				{
 					++oldIndex;
 					++newIndex;
@@ -77,7 +77,7 @@ namespace TestHelper
 		{
 			var simplifiedDoc = Simplifier.ReduceAsync(document, Simplifier.Annotation).Result;
 			var root = simplifiedDoc.GetSyntaxRootAsync().Result;
-			root=Formatter.Format(root, Formatter.Annotation, simplifiedDoc.Project.Solution.Workspace);
+			root = Formatter.Format(root, Formatter.Annotation, simplifiedDoc.Project.Solution.Workspace);
 			return root.GetText().ToString();
 		}
 	}

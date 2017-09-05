@@ -1,15 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="SwitchEnum.Vsix..b5c804d0-a235-4cf4-bfc9-b4c1a04ed82b" Version="1.0" Language="en-US" Publisher="evald_000"/>
-    <DisplayName>SwitchEnum.Vsix</DisplayName>
+    <Identity Id="SwitchEnum..93d03bbf-2120-41fb-bb70-1ef6ccbd44eb" Version="1.0" Language="en-US" Publisher="Evaldas"/>
+    <DisplayName>SwitchEnum</DisplayName>
     <Description xml:space="preserve">This is a sample diagnostic extension for the .NET Compiler Platform ("Roslyn").</Description>
   </Metadata>
   <Installation>
-    <InstallationTarget Version="[15.0,]" Id="Microsoft.VisualStudio.Pro" />
-    <InstallationTarget Version="[15.0,]" Id="Microsoft.VisualStudio.VSWinDesktopExpress" />
-    <InstallationTarget Version="[15.0,]" Id="Microsoft.VisualStudio.VWDExpress" />
-    <InstallationTarget Version="[15.0,]" Id="Microsoft.VisualStudio.VSWinExpress" />
+    <InstallationTarget Version="[14.0,]" Id="Microsoft.VisualStudio.Pro" />
   </Installation>
   <Dependencies>
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
@@ -19,7 +16,7 @@
     <Asset Type="Microsoft.VisualStudio.Analyzer" d:Source="Project" d:ProjectName="SwitchEnum" Path="|SwitchEnum|"/>
   </Assets>
   <Prerequisites>
-    <Prerequisite Id="Microsoft.VisualStudio.Component.Roslyn.LanguageServices" Version="[15.0.26208.0,16.0)" DisplayName="C# and Visual Basic" />
-    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0.26208.0,16.0)" DisplayName="Visual Studio core editor" />
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,16.0)" DisplayName="Visual Studio core editor" />
+    <Prerequisite Id="Microsoft.VisualStudio.Component.Roslyn.LanguageServices" Version="[15.0,16.0)" DisplayName="Roslyn Language Services" />
   </Prerequisites>
 </PackageManifest>

@@ -10,23 +10,24 @@ namespace TestHelper
 	{
 		public DiagnosticResultLocation(string path, int line, int column)
 		{
-			if (line<0&&column<0)
+			if (line < -1)
 			{
-				throw new ArgumentOutOfRangeException("At least one of line and column must be > 0");
-			}
-			if (line<-1||column<-1)
-			{
-				throw new ArgumentOutOfRangeException("Both line and column must be >= -1");
+				throw new ArgumentOutOfRangeException(nameof(line), "line must be >= -1");
 			}
 
-			this.Path=path;
-			this.Line=line;
-			this.Column=column;
+			if (column < -1)
+			{
+				throw new ArgumentOutOfRangeException(nameof(column), "column must be >= -1");
+			}
+
+			this.Path = path;
+			this.Line = line;
+			this.Column = column;
 		}
 
-		public string Path;
-		public int Line;
-		public int Column;
+		public string Path { get; }
+		public int Line { get; }
+		public int Column { get; }
 	}
 
 	/// <summary>
@@ -40,16 +41,16 @@ namespace TestHelper
 		{
 			get
 			{
-				if (this.locations==null)
+				if (this.locations == null)
 				{
-					this.locations=new DiagnosticResultLocation[] { };
+					this.locations = new DiagnosticResultLocation[] { };
 				}
 				return this.locations;
 			}
 
 			set
 			{
-				this.locations=value;
+				this.locations = value;
 			}
 		}
 
@@ -63,7 +64,7 @@ namespace TestHelper
 		{
 			get
 			{
-				return this.Locations.Length>0 ? this.Locations[0].Path : "";
+				return this.Locations.Length > 0 ? this.Locations[0].Path : "";
 			}
 		}
 
@@ -71,7 +72,7 @@ namespace TestHelper
 		{
 			get
 			{
-				return this.Locations.Length>0 ? this.Locations[0].Line : -1;
+				return this.Locations.Length > 0 ? this.Locations[0].Line : -1;
 			}
 		}
 
@@ -79,7 +80,7 @@ namespace TestHelper
 		{
 			get
 			{
-				return this.Locations.Length>0 ? this.Locations[0].Column : -1;
+				return this.Locations.Length > 0 ? this.Locations[0].Column : -1;
 			}
 		}
 	}
